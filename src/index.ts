@@ -32,9 +32,11 @@ export = (app: Application) => {
 
 function createCheckRunOutputReport(improperModifications: string[]): any {
   const n = improperModifications.length;
-  let conclusion: string;
-  const title = "repolockr report";
+
   let output: any;
+  const title = "repolockr report";
+  let conclusion: string;
+
   if (n === 0) {
     conclusion = "success";
     output = {
@@ -44,15 +46,22 @@ function createCheckRunOutputReport(improperModifications: string[]): any {
   } else {
     let text = "The following locked files were modified:";
     for (const file of improperModifications) {
-      text += `\n  ${file}`;
+      text += `\n- ${file}`;
     }
     conclusion = "failure";
+    let summary: string;
+    if (n === 1) {
+      summary = 'There was 1 locked file that was modified';
+    } else {
+      summary = `There were ${n} locked files that were modified`;
+    }
     output = {
-      summary: `There were ${n} locked files that were modified`,
+      summary,
       text,
       title,
     };
   }
+
   return {
     conclusion,
     output,
