@@ -24,7 +24,7 @@ export = (app: Application) => {
   app.on(["check_run.created", "check_run.rerequested"], async (context) => {
     app.log.info(`Responding to ${context.event}`);
     const config = await loadConfig(context);
-    const checkRunId = context.payload.id;
+    const checkRunId = context.payload.check_run.id;
 
     let report: any;
     if (!config || !config.lock || config.lock.length === 0) {

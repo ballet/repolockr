@@ -1,4 +1,5 @@
 import { Context } from "probot";
+import * as util from "util";
 
 export function atos(s: string | undefined): string {
   if (!s) {
@@ -12,8 +13,10 @@ export function getPullRequest(context: Context) {
   if (context.event.startsWith("pull_request")) {
     return context.payload.pull_request;
   } else if (context.event.startsWith("check_run")) {
-    const pullRequests = context.payload.check_suite.pull_requests;
-    if (pullRequests.length === 0) {
+    const pullRequests = context.payload.check_run.pull_requests;
+    if (!pullRequests || pullRequests.length === 0) {
+      const payload = util.inspect(context.payload);
+      context.log.error(`Missing pull requests: ${payload}`);
       throw new Error("Missing pull requests");
     } else if (pullRequests.length === 1) {
       return pullRequests[0];
