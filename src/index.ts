@@ -16,8 +16,8 @@ export = (app: Application) => {
     }
 
     // immediately create in-progress check run
-    const { id: check_run_id } = await createCheckRun(context, { timeStart });
-    app.log.info(`Created checkrun ${check_run_id}`);
+    const { id: checkRunId } = await createCheckRun(context, { timeStart });
+    app.log.info(`Created checkrun ${checkRunId}`);
 
     // get list of files modified by pr
     const lockList = config.lock!;
@@ -25,8 +25,8 @@ export = (app: Application) => {
     const improperModifications = modifiedFiles
       .filter(f => lockList.includes(f));
     const report = createCheckRunOutputReport(improperModifications);
-    const { status, conclusion } = await completeCheckRun(context, check_run_id, report);
-    app.log.info(`Updated checkrun ${check_run_id}: status=${status}, conclusion=${conclusion}`);
+    const { status, conclusion } = await completeCheckRun(context, checkRunId, report);
+    app.log.info(`Updated checkrun ${checkRunId}: status=${status}, conclusion=${conclusion}`);
   })
 }
 
@@ -35,7 +35,7 @@ function createCheckRunOutputReport(improperModifications: string[]): any {
   let conclusion: string;
   const title = 'repolockr report';
   let output: any;
-  if (n == 0) {
+  if (n === 0) {
     conclusion = 'success';
     output = {
       title: title,
@@ -95,7 +95,7 @@ function shouldRunCheck(context: Context, config: RepolockrConfig): { run: boole
 
   // 2. no lock list or lock list is empty
   const lockList = config.lock;
-  if (!lockList || lockList.length == 0) {
+  if (!lockList || !lockList.length) {
     return { run: false, reason: 'no lock list set' };
   }
 
