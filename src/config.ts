@@ -1,7 +1,7 @@
 import { ReposGetContentsResponse } from "@octokit/rest";
 import * as yaml from "js-yaml";
 import { Context } from "probot";
-import { atos } from "./util";
+import { atos, getPullRequest } from "./util";
 
 const CONFIG_PATH = ".github/repolockr.yml";
 const DEFAULT_CONFIG_REFERENCE = "master";
@@ -14,7 +14,8 @@ export interface IRepolockrConfig {
 }
 
 async function getBaseReference(context: Context): Promise<string> {
-  return context.payload.pull_request.base.sha;
+  const pullRequest = getPullRequest(context);
+  return pullRequest.base.sha;
 }
 
 type ReposGetContentsResponseFile =

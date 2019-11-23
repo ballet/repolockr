@@ -1,6 +1,7 @@
 import { ChecksUpdateResponse } from "@octokit/rest";
 import { Application, Context } from "probot"; // eslint-disable-line no-unused-vars
 import { IRepolockrConfig, loadConfig } from "./config";
+import { getPullRequest } from "./util";
 
 export = (app: Application) => {
   app.on(["pull_request.opened", "pull_request.synchronize"], async (context) => {
@@ -18,13 +19,37 @@ export = (app: Application) => {
     // immediately create in-progress check run
     const { id: checkRunId } = await createCheckRun(context, { timeStart });
     app.log.info(`Created checkrun ${checkRunId}`);
+  });
 
-    // get list of files modified by pr
-    const lockList = config.lock!;
-    const modifiedFiles = await getChangedFiles(context);
-    const improperModifications = modifiedFiles
-      .filter((f) => lockList.includes(f));
-    const report = createCheckRunOutputReport(improperModifications);
+  app.on(['check_run.created', 'check_run.rerequested'], async (context) => {
+    app.log.info(`Responding to ${context.event}`);
+    const config = await loadConfig(context);
+    const checkRunId = context.payload.id;
+
+    let report: any;
+    if (!config || !config.lock || config.lock.length === 0) {
+      // something went wrong with the configuration
+      report = {
+        conclusion: "neutral",
+        output: {
+          summary: "The configured list of locked files could not be determined",
+          title: "repolockr report",
+        }
+      };
+    } else {
+      // get list of files modified by pr
+      const modifiedFiles = await getChangedFiles(context);
+
+      // check for improper modifications
+      const lockList = config.lock!;
+      const improperModifications = modifiedFiles
+        .filter((f) => lockList.includes(f));
+
+      // create report
+      report = createCheckRunOutputReport(improperModifications);
+    }
+
+    // update check run
     const { status, conclusion } = await completeCheckRun(context, checkRunId, report);
     app.log.info(`Updated checkrun ${checkRunId}: status=${status}, conclusion=${conclusion}`);
   });
@@ -74,7 +99,7 @@ interface ICreateCheckRunOptions {
 
 async function createCheckRun(context: Context, options: ICreateCheckRunOptions) {
   const response = await context.github.checks.create(context.issue({
-    head_sha: context.payload.pull_request.head.sha,
+    head_sha: getPullRequest(context).head.sha,
     name: "repolockr",
     status: "in_progress",
     ...options,
@@ -97,7 +122,7 @@ function shouldRunCheck(context: Context, config: IRepolockrConfig): { run: bool
   // reasons to not run
   // 1. on greenlisted branch
   const greenList = config.branches?.allow;
-  const pullRequestBranch = context.payload.pull_request.head.ref;
+  const pullRequestBranch = getPullRequest(context).head.ref;
   if (greenList && greenList.includes(pullRequestBranch)) {
     return { run: false, reason: "pull request branch is explicitly allowed" };
   }
@@ -112,12 +137,8 @@ function shouldRunCheck(context: Context, config: IRepolockrConfig): { run: bool
 }
 
 async function getChangedFiles(context: Context): Promise<string[]> {
-  const pullRequestNumber = getPullRequestNumber(context);
+  const pullRequestNumber = getPullRequest(context).number;
   const response = await context.github.pulls.listFiles(context.repo({ pull_number: pullRequestNumber }));
   const files: string[] = response.data.map((o) => o.filename);
   return files;
-}
-
-function getPullRequestNumber(context: Context): number {
-  return context.payload.pull_request.number;
 }
