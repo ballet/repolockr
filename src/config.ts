@@ -15,13 +15,7 @@ export interface RepolockrConfig {
 }
 
 async function getBaseReference(context: Context): Promise<string> {
-  const pullRequests = context.payload.pull_requests;
-  if (pullRequests.length == 1) {
-    const pullRequest = pullRequests[0];
-    return pullRequest.base.sha;
-  } else {
-    throw new Error();
-  }
+  return context.payload.pull_request.base.sha;
 }
 
 type ReposGetContentsResponseFile =
