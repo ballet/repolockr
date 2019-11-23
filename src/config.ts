@@ -40,7 +40,7 @@ export async function loadConfig(context: Context, ref?: string): Promise<IRepol
   const response = await context.github.repos.getContents(context.repo({ path: CONFIG_PATH, ref }));
   const content = (response.data as ReposGetContentsResponseFile).content;
   try {
-    return yaml.safeLoad(atos(content)) || {}
+    return yaml.safeLoad(atos(content)) || {};
   } catch (err) {
     context.log.error("Unexpected result for repolockr config file");
     return {};
