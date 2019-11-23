@@ -9,12 +9,12 @@ export function atos(s: string | undefined): string {
 }
 
 export function getPullRequest(context: Context) {
-  if (context.event.startsWith('pull_request')) {
+  if (context.event.startsWith("pull_request")) {
     return context.payload.pull_request;
-  } else if (context.event.startsWith('check_run')) {
+  } else if (context.event.startsWith("check_run")) {
     const pullRequests = context.payload.check_suite.pull_requests;
     if (pullRequests.length === 0) {
-      throw new Error('Missing pull requests');
+      throw new Error("Missing pull requests");
     } else if (pullRequests.length === 1) {
       return pullRequests[0];
     } else {
@@ -22,6 +22,6 @@ export function getPullRequest(context: Context) {
       return pullRequests[0];
     }
   } else {
-    throw new Error('Unexpected event: ${context.event}');
+    throw new Error("Unexpected event: ${context.event}");
   }
 }

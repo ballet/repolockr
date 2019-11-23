@@ -21,7 +21,7 @@ export = (app: Application) => {
     app.log.info(`Created checkrun ${checkRunId}`);
   });
 
-  app.on(['check_run.created', 'check_run.rerequested'], async (context) => {
+  app.on(["check_run.created", "check_run.rerequested"], async (context) => {
     app.log.info(`Responding to ${context.event}`);
     const config = await loadConfig(context);
     const checkRunId = context.payload.id;
@@ -34,7 +34,7 @@ export = (app: Application) => {
         output: {
           summary: "The configured list of locked files could not be determined",
           title: "repolockr report",
-        }
+        },
       };
     } else {
       // get list of files modified by pr
@@ -76,7 +76,7 @@ function createCheckRunOutputReport(improperModifications: string[]): any {
     conclusion = "failure";
     let summary: string;
     if (n === 1) {
-      summary = 'There was 1 locked file that was modified';
+      summary = "There was 1 locked file that was modified";
     } else {
       summary = `There were ${n} locked files that were modified`;
     }
