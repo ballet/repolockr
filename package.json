@@ -16,7 +16,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "nodemon --exec \"npm start\"",
-    "postinstall": "npm run build",
     "start": "probot run ./lib/index.js",
     "lint": "tslint src/*.ts --fix",
     "test": "jest && tslint src/*.ts",
