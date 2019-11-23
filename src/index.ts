@@ -1,9 +1,9 @@
-import { Application, Context } from 'probot'; // eslint-disable-line no-unused-vars
-import { loadConfig, RepolockrConfig } from './config';
-import { ChecksUpdateResponse } from '@octokit/rest';
+import { ChecksUpdateResponse } from "@octokit/rest";
+import { Application, Context } from "probot"; // eslint-disable-line no-unused-vars
+import { IRepolockrConfig, loadConfig } from "./config";
 
 export = (app: Application) => {
-  app.on(['pull_request.opened', 'pull_request.synchronize'], async (context) => {
+  app.on(["pull_request.opened", "pull_request.synchronize"], async (context) => {
     app.log.info(`Responding to ${context.event}`);
     const timeStart = new Date(Date.now());
 
@@ -23,52 +23,52 @@ export = (app: Application) => {
     const lockList = config.lock!;
     const modifiedFiles = await getChangedFiles(context);
     const improperModifications = modifiedFiles
-      .filter(f => lockList.includes(f));
+      .filter((f) => lockList.includes(f));
     const report = createCheckRunOutputReport(improperModifications);
     const { status, conclusion } = await completeCheckRun(context, checkRunId, report);
     app.log.info(`Updated checkrun ${checkRunId}: status=${status}, conclusion=${conclusion}`);
-  })
-}
+  });
+};
 
 function createCheckRunOutputReport(improperModifications: string[]): any {
   const n = improperModifications.length;
   let conclusion: string;
-  const title = 'repolockr report';
+  const title = "repolockr report";
   let output: any;
   if (n === 0) {
-    conclusion = 'success';
+    conclusion = "success";
     output = {
-      title: title,
-      summary: 'OK'
-    }
+      summary: "OK",
+      title,
+    };
   } else {
-    let text = 'The following locked files were modified:'
-    for (let file of improperModifications) {
+    let text = "The following locked files were modified:";
+    for (const file of improperModifications) {
       text += `\n  ${file}`;
     }
-    conclusion = 'failure';
+    conclusion = "failure";
     output = {
-      title: title,
       summary: `There were ${n} locked files that were modified`,
-      text: text
-    }
+      text,
+      title,
+    };
   }
   return {
-    conclusion: conclusion,
-    output: output
-  }
+    conclusion,
+    output,
+  };
 }
 
-interface CreateCheckRunOptions {
+interface ICreateCheckRunOptions {
   timeStart?: Date;
 }
 
-async function createCheckRun(context: Context, options: CreateCheckRunOptions) {
+async function createCheckRun(context: Context, options: ICreateCheckRunOptions) {
   const response = await context.github.checks.create(context.issue({
-    name: 'repolockr',
     head_sha: context.payload.pull_request.head.sha,
-    status: 'in_progress',
-    ...options
+    name: "repolockr",
+    status: "in_progress",
+    ...options,
   }));
   return response.data;
 }
@@ -77,26 +77,26 @@ async function completeCheckRun(context: Context, id: number, options: any): Pro
   const endTime = new Date(Date.now());
   const response = await context.github.checks.update(context.repo({
     check_run_id: id,
-    status: "completed",
     completed_at: endTime,
-    ...options
+    status: "completed",
+    ...options,
   }));
   return response.data;
 }
 
-function shouldRunCheck(context: Context, config: RepolockrConfig): { run: boolean, reason?: string } {
+function shouldRunCheck(context: Context, config: IRepolockrConfig): { run: boolean, reason?: string } {
   // reasons to not run
   // 1. on greenlisted branch
   const greenList = config.branches?.allow;
   const pullRequestBranch = context.payload.pull_request.head.ref;
   if (greenList && greenList.includes(pullRequestBranch)) {
-    return { run: false, reason: 'pull request branch is explicitly allowed' };
-  };
+    return { run: false, reason: "pull request branch is explicitly allowed" };
+  }
 
   // 2. no lock list or lock list is empty
   const lockList = config.lock;
   if (!lockList || !lockList.length) {
-    return { run: false, reason: 'no lock list set' };
+    return { run: false, reason: "no lock list set" };
   }
 
   return { run: true };
@@ -105,10 +105,9 @@ function shouldRunCheck(context: Context, config: RepolockrConfig): { run: boole
 async function getChangedFiles(context: Context): Promise<string[]> {
   const pullRequestNumber = getPullRequestNumber(context);
   const response = await context.github.pulls.listFiles(context.repo({ pull_number: pullRequestNumber }));
-  const files: string[] = response.data.map(o => o.filename);
+  const files: string[] = response.data.map((o) => o.filename);
   return files;
 }
-
 
 function getPullRequestNumber(context: Context): number {
   return context.payload.pull_request.number;

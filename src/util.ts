@@ -1,7 +1,7 @@
 export function atos(s: string | undefined): string {
   if (!s) {
-    return '';
+    return "";
   } else {
-    return Buffer.from(s, 'base64').toString('utf-8');
+    return Buffer.from(s, "base64").toString("utf-8");
   }
 }
