@@ -17,8 +17,8 @@
     "build": "tsc -p tsconfig.json",
     "dev": "nodemon --exec \"npm start\"",
     "start": "probot run ./lib/index.js",
-    "lint": "standard **/*.ts --fix",
-    "test": "jest && standard **/*.ts",
+    "lint": "tslint src/*.ts --fix",
+    "test": "jest && tslint src/*.ts",
     "test:watch": "jest --watch --notify --notifyMode=change --coverage"
   },
   "dependencies": {
@@ -37,7 +37,6 @@
     "nock": "^11.4.0",
     "nodemon": "^1.19.4",
     "smee-client": "^1.1.0",
-    "standard": "^14.3.1",
     "ts-jest": "^24.1.0",
     "tslint": "^5.20.1",
     "typescript": "^3.6.4"
