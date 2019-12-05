@@ -1,9 +1,18 @@
 import { ChecksUpdateResponse } from "@octokit/rest";
+import express from "express";
 import { Application, Context } from "probot"; // eslint-disable-line no-unused-vars
 import { IRepolockrConfig, loadConfig } from "./config";
 import { getPullRequest } from "./util";
 
 export = (app: Application) => {
+  // Status check
+  const router = app.route("/repolockr");
+  router.use(express.static("public"));
+  router.get("/statusz", (req, res) => {
+    res.send("OK");
+  });
+
+  // Probot
   app.on(["pull_request.opened", "pull_request.synchronize"], async (context) => {
     app.log.info(`Responding to ${context.event}`);
     const timeStart = new Date(Date.now());
