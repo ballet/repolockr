@@ -8,7 +8,7 @@ export = (app: Application) => {
   // Status check
   const router = app.route("/repolockr");
   router.use(express.static("public"));
-  router.get("/statusz", (req, res) => {
+  router.get("/statusz", (req:any, res:any) => {
     res.send("OK");
   });
 
@@ -31,6 +31,10 @@ export = (app: Application) => {
   });
 
   app.on(["check_run.created", "check_run.rerequested"], async (context) => {
+    if (!isCheckRunForMyApp(context)) {
+      context.log.debug(`Ignoring check run from different app`);
+      return
+    }
 
     context.log.info(`Responding to ${context.event}`);
     const config = await loadConfig(context);
@@ -64,6 +68,10 @@ export = (app: Application) => {
     context.log.info(`Updated checkrun ${checkRunId}: status=${status}, conclusion=${conclusion}`);
   });
 };
+
+function isCheckRunForMyApp(context: Context): boolean {
+  return context.payload.check_run.app.id === process.env.APP_ID;
+}
 
 function createCheckRunOutputReport(improperModifications: string[]): any {
   const n = improperModifications.length;
