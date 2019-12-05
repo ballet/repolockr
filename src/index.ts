@@ -14,24 +14,25 @@ export = (app: Application) => {
 
   // Probot
   app.on(["pull_request.opened", "pull_request.synchronize"], async (context) => {
-    app.log.info(`Responding to ${context.event}`);
+    context.log.info(`Responding to ${context.event}`);
     const timeStart = new Date(Date.now());
 
     // check if check run is needed
     const config = await loadConfig(context);
     const { run: shouldRun, reason } = shouldRunCheck(context, config);
     if (!shouldRun) {
-      app.log.info(`Exiting - should not run check (${reason})`);
+      context.log.info(`Exiting - should not run check (${reason})`);
       return;
     }
 
     // immediately create in-progress check run
     const { id: checkRunId } = await createCheckRun(context, { timeStart });
-    app.log.info(`Created checkrun ${checkRunId}`);
+    context.log.info(`Created checkrun ${checkRunId}`);
   });
 
   app.on(["check_run.created", "check_run.rerequested"], async (context) => {
-    app.log.info(`Responding to ${context.event}`);
+
+    context.log.info(`Responding to ${context.event}`);
     const config = await loadConfig(context);
     const checkRunId = context.payload.check_run.id;
 
@@ -60,7 +61,7 @@ export = (app: Application) => {
 
     // update check run
     const { status, conclusion } = await completeCheckRun(context, checkRunId, report);
-    app.log.info(`Updated checkrun ${checkRunId}: status=${status}, conclusion=${conclusion}`);
+    context.log.info(`Updated checkrun ${checkRunId}: status=${status}, conclusion=${conclusion}`);
   });
 };
 
