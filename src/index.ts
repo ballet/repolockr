@@ -75,7 +75,10 @@ export = (app: Application) => {
 };
 
 function isCheckRunForMyApp(context: Context): boolean {
-  return context.payload.check_run.app.id === process.env.APP_ID;
+  const requestingAppId = context.payload.check_run.app.id;
+  const myAppId = process.env.APP_ID;
+  context.log.debug(`comparing ${requestingAppId} === ${myAppId}`);
+  return requestingAppId === myAppId;
 }
 
 function createCheckRunOutputReport(improperModifications: string[]): any {
