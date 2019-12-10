@@ -27,8 +27,8 @@ export async function completeCheckRun(context: Context, id: number, options: an
 
 export async function getChangedFiles(context: Context): Promise<string[]> {
   const externalId = context.payload.check_run.external_id;
-  const pullRequestNumber = decodePullRequestInfo(externalId);
-  const response = await context.github.pulls.listFiles(context.repo({ pull_number: pullRequestNumber }));
+  const { pullNumber } = decodePullRequestInfo(externalId);
+  const response = await context.github.pulls.listFiles(context.repo({ pull_number: pullNumber }));
   const files: string[] = response.data.map((o) => o.filename);
   return files;
 }
