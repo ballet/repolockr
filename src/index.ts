@@ -75,9 +75,10 @@ export = (app: Application) => {
 };
 
 function isCheckRunForMyApp(context: Context): boolean {
-  const requestingAppId = context.payload.check_run.app.id;
-  const myAppId = process.env.APP_ID;
-  context.log.debug(`comparing ${requestingAppId} === ${myAppId}`);
+  // this is a number (see WebhookPayloadCheckSuiteCheckSuiteApp)
+  const requestingAppId: number = context.payload.check_run.app.id;
+  // this is a string and needs to be converted
+  const myAppId: number = Number(process.env.APP_ID);
   return requestingAppId === myAppId;
 }
 
