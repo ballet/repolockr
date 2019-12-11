@@ -1,3 +1,5 @@
+![Uptime Status](https://img.shields.io/uptimerobot/status/m783943272-91f8a33855da57b823b1f98b)
+
 # repolockr
 
 A GitHub App built with [Probot](https://github.com/probot/probot) that locks files in pull requests.
