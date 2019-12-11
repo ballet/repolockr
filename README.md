@@ -11,7 +11,7 @@ repolockr addresses this problem by allowing a list of "locked files" to be spec
 
 Go to [repolockr](https://github.com/apps/repolockr) and press the big green install button. Then [create a config file](#repolockr-config-file). From now on, the repolockr app will automatically fail any PRs that modify the files you specify.
 
-## repolockr config file
+### repolockr config file
 
 Create `.github/repolockr.yml` on your master branch. As an example:
 
@@ -28,7 +28,9 @@ branches:
 
 Currently, there are only two configuration options supported. `lock` is a list of files that should not be modified in PRs. `branches.allow` is a list of branches to allow any edits (i.e. not check modifications at all).
 
-## Setup
+## Development
+
+### Setup
 
 ```sh
 # Install dependencies
@@ -41,7 +43,7 @@ npm run build
 npm start
 ```
 
-## Contributing
+### Contributing
 
 If you have suggestions for how repolockr could be improved, or want to report a bug, open an issue! We'd love all and any contributions.
 
